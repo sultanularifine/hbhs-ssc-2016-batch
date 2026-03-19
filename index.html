@@ -425,36 +425,60 @@
             });
         };
 
-        // Search & Filter Logic
-        const searchInput = document.getElementById('searchInput');
-        const bloodFilter = document.getElementById('bloodFilter');
-        const studentItems = document.querySelectorAll('.student-item');
+       // Updated Search & Filter Logic
+const searchInput = document.getElementById('searchInput');
+const bloodFilter = document.getElementById('bloodFilter');
+const studentItems = document.querySelectorAll('.student-item');
 
-        function filterStudents() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const bloodTerm = bloodFilter.value;
+function filterStudents() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const bloodTerm = bloodFilter.value;
 
-            studentItems.forEach(item => {
-                const name = item.getAttribute('data-name').toLowerCase();
-                const profession = item.getAttribute('data-profession').toLowerCase();
-                const blood = item.getAttribute('data-blood');
+    studentItems.forEach(item => {
+        // Shokol data attribute gulo niche neya hoyeche
+        const name = item.getAttribute('data-name')?.toLowerCase() || "";
+        const profession = item.getAttribute('data-profession')?.toLowerCase() || "";
+        const blood = item.getAttribute('data-blood') || "";
+        // Address logic: element-er bhetor theke text content nite hobe jodi attribute-e na thake
+        const addressElement = item.querySelector('.font-sans');
+        const address = addressElement ? addressElement.textContent.toLowerCase() : "";
 
-                const matchesSearch = name.includes(searchTerm) || profession.includes(searchTerm);
-                const matchesBlood = bloodTerm === "" || blood === bloodTerm;
+        // Jekono ekta match korlei true hobe
+        const matchesSearch = name.includes(searchTerm) || 
+                              profession.includes(searchTerm) || 
+                              blood.toLowerCase().includes(searchTerm) ||
+                              address.includes(searchTerm);
 
-                if (matchesSearch && matchesBlood) {
-                    item.style.display = "block";
-                    gsap.to(item, { opacity: 1, scale: 1, duration: 0.3 });
-                } else {
+        // Blood dropdown filter matching
+        const matchesBloodDropdown = bloodTerm === "" || blood === bloodTerm;
+
+        if (matchesSearch && matchesBloodDropdown) {
+            item.style.display = "block";
+            // Smooth appearance animation
+            gsap.to(item, { 
+                opacity: 1, 
+                scale: 1, 
+                y: 0,
+                duration: 0.4, 
+                ease: "power2.out" 
+            });
+        } else {
+            // Smooth disappearance animation then hide
+            gsap.to(item, { 
+                opacity: 0, 
+                scale: 0.95, 
+                y: 10,
+                duration: 0.3, 
+                onComplete: () => {
                     item.style.display = "none";
-                    item.style.opacity = "0";
                 }
             });
         }
+    });
+}
 
-        searchInput.addEventListener('input', filterStudents);
-        bloodFilter.addEventListener('change', filterStudents);
-
+searchInput.addEventListener('input', filterStudents);
+bloodFilter.addEventListener('change', filterStudents);
         // Three.js Background
         let scene, camera, renderer, particles;
         function init3D() {
